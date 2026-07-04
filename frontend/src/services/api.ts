@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://panboard.onrender.com';
 
 export interface UploadResponse {
   dataset_id: string;
