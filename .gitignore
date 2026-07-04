@@ -1,0 +1,15 @@
+# Python env & caches
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+backend/data_cache/
+
+# Node dependencies & builds
+frontend/node_modules/
+frontend/dist/
+
+# System & Editor configs
+.DS_Store
+.vscode/
+.idea/
+*.log
