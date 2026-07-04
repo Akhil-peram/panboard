@@ -8,14 +8,14 @@ ENV PYTHONUNBUFFERED=1 \
 # Set the container's working directory
 WORKDIR /app
 
-# Copy dependency file
-COPY requirements.txt .
+# Copy dependency specifications from the backend folder
+COPY backend/requirements.txt .
 
 # Install packages
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
-COPY . .
+# Copy the backend application code into /app
+COPY backend/ .
 
 # Ensure the cache folder exists and has correct permissions
 RUN mkdir -p data_cache && chmod -R 777 data_cache
