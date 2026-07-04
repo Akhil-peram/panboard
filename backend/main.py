@@ -13,7 +13,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://panboard.akhil01011.workers.dev",
+        "https://panboard.pages.dev",
         "http://localhost:5173"
     ],
     allow_credentials=True,
