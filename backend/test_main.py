@@ -165,6 +165,99 @@ def test_transform_reset():
     reset_json = reset_resp.json()
     assert reset_json["row_count"] == 2
 
+def test_upload_xlsx():
+    # Create a dummy DataFrame and write it to Excel xlsx format in memory
+    df_data = pd.DataFrame({"name": ["Alice", "Bob"], "age": [30, 25]})
+    file_buf = io.BytesIO()
+    df_data.to_excel(file_buf, index=False)
+    file_buf.seek(0)
+    
+    response = client.post(
+        "/api/upload",
+        files={"file": ("test.xlsx", file_buf, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+    )
+    
+    assert response.status_code == 200
+    json_response = response.json()
+    assert "error" not in json_response
+    assert json_response["filename"] == "test.xlsx"
+    assert json_response["row_count"] == 2
+    assert "name" in json_response["columns"]
+    assert "age" in json_response["columns"]
 
+def test_upload_xls_mocked():
+    from unittest.mock import patch
+    with patch("main.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = pd.DataFrame({"name": ["Alice"], "age": [30]})
+        
+        response = client.post(
+            "/api/upload",
+            files={"file": ("test.xls", io.BytesIO(b"dummy xls"), "application/vnd.ms-excel")}
+        )
+        
+        assert response.status_code == 200
+        json_response = response.json()
+        assert "error" not in json_response
+        assert json_response["filename"] == "test.xls"
+        mock_read_excel.assert_called_once()
 
+def test_upload_csv_case_insensitive():
+    data = "name,age\nAlice,30"
+    file = io.BytesIO(data.encode("utf-8"))
+    
+    response = client.post(
+        "/api/upload",
+        files={"file": ("test.CSV", file, "text/csv")}
+    )
+    
+    assert response.status_code == 200
+    json_response = response.json()
+    assert json_response["filename"] == "test.CSV"
 
+def test_upload_xlsx_case_insensitive():
+    df_data = pd.DataFrame({"name": ["Alice"], "age": [30]})
+    file_buf = io.BytesIO()
+    df_data.to_excel(file_buf, index=False)
+    file_buf.seek(0)
+    
+    response = client.post(
+        "/api/upload",
+        files={"file": ("test.XLSX", file_buf, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+    )
+    
+    assert response.status_code == 200
+    json_response = response.json()
+    assert "error" not in json_response
+    assert json_response["filename"] == "test.XLSX"
+
+def test_upload_xlsb_mocked():
+    from unittest.mock import patch
+    with patch("main.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = pd.DataFrame({"name": ["Alice"], "age": [30]})
+        
+        response = client.post(
+            "/api/upload",
+            files={"file": ("test.xlsb", io.BytesIO(b"dummy xlsb"), "application/vnd.ms-excel.sheet.binary.macroEnabled.12")}
+        )
+        
+        assert response.status_code == 200
+        json_response = response.json()
+        assert "error" not in json_response
+        assert json_response["filename"] == "test.xlsb"
+        mock_read_excel.assert_called_once()
+
+def test_upload_ods_mocked():
+    from unittest.mock import patch
+    with patch("main.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = pd.DataFrame({"name": ["Alice"], "age": [30]})
+        
+        response = client.post(
+            "/api/upload",
+            files={"file": ("test.ods", io.BytesIO(b"dummy ods"), "application/vnd.oasis.opendocument.spreadsheet")}
+        )
+        
+        assert response.status_code == 200
+        json_response = response.json()
+        assert "error" not in json_response
+        assert json_response["filename"] == "test.ods"
+        mock_read_excel.assert_called_once()

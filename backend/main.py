@@ -118,10 +118,11 @@ async def upload_file(file: UploadFile = File(...)):
         # Read the file content
         contents = await file.read()
         
-        # Process based on file type
-        if file.filename.endswith('.csv'):
+        # Process based on file type (case-insensitive checks)
+        filename_lower = file.filename.lower()
+        if filename_lower.endswith('.csv'):
             df = pd.read_csv(io.BytesIO(contents))
-        elif file.filename.endswith(('.xls', '.xlsx')):
+        elif filename_lower.endswith(('.xls', '.xlsx', '.xlsm', '.xlsb', '.ods')):
             df = pd.read_excel(io.BytesIO(contents))
         else:
             return {"error": "Unsupported file type. Please upload a CSV or Excel file."}

@@ -81,7 +81,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
           type="file"
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
           onChange={handleFileInput}
-          accept=".csv,.xls,.xlsx"
+          accept=".csv,.xls,.xlsx,.xlsm,.xlsb,.ods"
           disabled={isUploading}
         />
         
