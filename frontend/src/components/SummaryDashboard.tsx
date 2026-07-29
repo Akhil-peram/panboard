@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { transformDataset } from '../services/api';
+import { transformDataset, getExportUrl } from '../services/api';
 import type { UploadResponse, TransformPayload } from '../services/api';
 import { toPng, toSvg } from 'html-to-image';
 import { 
@@ -19,7 +19,14 @@ import {
   Hash,
   AlertCircle,
   Settings,
-  Wand2
+  Wand2,
+  CheckCircle,
+  AlertTriangle,
+  Sparkles,
+  ChevronDown,
+  FileSpreadsheet,
+  FileCode,
+  FileText
 } from 'lucide-react';
 
 interface SummaryDashboardProps {
@@ -36,6 +43,8 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
   const [yAxis, setYAxis] = useState(data?.numeric_columns?.[0] || data?.columns?.[0] || '');
   const [searchTerm, setSearchTerm] = useState('');
   const [sampleSize, setSampleSize] = useState(20);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [aggFunc, setAggFunc] = useState<'none' | 'sum' | 'mean' | 'count' | 'min' | 'max'>('none');
 
   // Transformations state
   const [transformingCol, setTransformingCol] = useState<{ name: string; action: 'impute' | 'cast' | 'rename' } | null>(null);
@@ -215,23 +224,56 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
   // Data for custom charts
   const customChartData = useMemo(() => {
     if (!sample_data) return [];
-    return sample_data.slice(0, sampleSize).map(row => {
-      const xVal = row[xAxis];
+    
+    if (aggFunc === 'none') {
+      return sample_data.slice(0, sampleSize).map(row => {
+        const xVal = row[xAxis];
+        const rawY = row[yAxis];
+        let yVal = 0;
+        if (typeof rawY === 'number') {
+          yVal = rawY;
+        } else if (typeof rawY === 'string') {
+          yVal = parseFloat(rawY) || 0;
+        }
+        return {
+          x: xVal,
+          y: yVal,
+          value: yVal, // Unified property for Recharts type compatibility
+          name: xVal?.toString() || ''
+        };
+      });
+    }
+
+    // Grouping & Aggregation by X
+    const groups: Record<string, number[]> = {};
+    sample_data.forEach(row => {
+      const xKey = row[xAxis]?.toString() ?? 'N/A';
       const rawY = row[yAxis];
       let yVal = 0;
-      if (typeof rawY === 'number') {
-        yVal = rawY;
-      } else if (typeof rawY === 'string') {
-        yVal = parseFloat(rawY) || 0;
-      }
+      if (typeof rawY === 'number') yVal = rawY;
+      else if (typeof rawY === 'string') yVal = parseFloat(rawY) || 0;
+
+      if (!groups[xKey]) groups[xKey] = [];
+      groups[xKey].push(yVal);
+    });
+
+    return Object.entries(groups).slice(0, sampleSize).map(([xKey, vals]) => {
+      let finalVal = 0;
+      if (aggFunc === 'sum') finalVal = vals.reduce((a, b) => a + b, 0);
+      else if (aggFunc === 'mean') finalVal = vals.reduce((a, b) => a + b, 0) / vals.length;
+      else if (aggFunc === 'count') finalVal = vals.length;
+      else if (aggFunc === 'min') finalVal = Math.min(...vals);
+      else if (aggFunc === 'max') finalVal = Math.max(...vals);
+
+      const rounded = Number(finalVal.toFixed(2));
       return {
-        x: xVal,
-        y: yVal,
-        value: yVal, // Unified property for Recharts type compatibility
-        name: xVal?.toString() || ''
+        x: xKey,
+        y: rounded,
+        value: rounded,
+        name: xKey
       };
     });
-  }, [sample_data, xAxis, yAxis, sampleSize]);
+  }, [sample_data, xAxis, yAxis, sampleSize, aggFunc]);
 
   // Data for categorical charts (Frequency)
   const frequencyData = useMemo(() => {
@@ -428,6 +470,52 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
             <Activity className="h-3 w-3 mr-1.5 text-green-500" />
             {data.filename} • {data.row_count} rows
           </div>
+          {/* Export Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-xl transition-all duration-300 border border-indigo-500/20"
+              title="Export cleaned dataset"
+            >
+              <Download className="h-3.5 w-3.5 mr-1" />
+              <span>Export Data</span>
+              <ChevronDown className="h-3 w-3 ml-0.5" />
+            </button>
+            {showExportDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-theme-card border border-theme-border rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <a
+                  href={getExportUrl(data.dataset_id, 'csv')}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShowExportDropdown(false)}
+                  className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                >
+                  <FileText className="h-4 w-4 mr-2 text-emerald-400" />
+                  CSV File (.csv)
+                </a>
+                <a
+                  href={getExportUrl(data.dataset_id, 'xlsx')}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShowExportDropdown(false)}
+                  className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2 text-blue-400" />
+                  Excel Workbook (.xlsx)
+                </a>
+                <a
+                  href={getExportUrl(data.dataset_id, 'json')}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShowExportDropdown(false)}
+                  className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                >
+                  <FileCode className="h-4 w-4 mr-2 text-amber-400" />
+                  JSON Format (.json)
+                </a>
+              </div>
+            )}
+          </div>
           <button 
             onClick={handleResetDataset}
             className="flex items-center px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all duration-300 border border-rose-500/20"
@@ -440,6 +528,51 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
 
       {activeTab === 'overview' && (
         <div className="space-y-8 animate-in fade-in duration-500">
+          {/* AI Data Insights & Health Score */}
+          {data.insights && (
+            <div className="bg-theme-card p-6 rounded-2xl shadow-sm border border-theme-border space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-4 border-b border-theme-border pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-theme-text flex items-center">
+                      Automated Data Quality & Audit
+                    </h3>
+                    <p className="text-xs text-theme-sub">Real-time statistical anomaly and missingness checks</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 bg-theme-bg px-4 py-2 rounded-xl border border-theme-border">
+                  <span className="text-xs font-semibold text-theme-sub">Data Health Score:</span>
+                  <span className={`text-sm font-extrabold ${data.insights.health_score >= 80 ? 'text-emerald-400' : data.insights.health_score >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>
+                    {data.insights.health_score}%
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {data.insights.items.map((item, idx) => (
+                  <div key={idx} className="p-4 rounded-xl border border-theme-border bg-theme-bg/50 flex items-start space-x-3">
+                    {item.type === 'warning' ? (
+                      <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                    ) : item.type === 'success' ? (
+                      <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+                    ) : (
+                      <Info className="h-5 w-5 text-indigo-400 shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs font-bold text-theme-text">{item.title}</span>
+                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-theme-card text-theme-sub border border-theme-border">{item.category}</span>
+                      </div>
+                      <p className="text-xs text-theme-sub mt-1">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard title="Total Rows" value={data.row_count.toLocaleString()} icon={<Hash className="h-5 w-5" />} color="indigo" />
@@ -672,6 +805,21 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                     >
                       {numeric_columns.map(col => <option key={col} value={col}>{col}</option>)}
                       {numeric_columns.length === 0 && <option value="">No Numeric Data</option>}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Aggregation</label>
+                    <select 
+                      value={aggFunc} 
+                      onChange={(e) => setAggFunc(e.target.value as any)}
+                      className="w-full bg-theme-bg border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text focus:ring-2 focus:ring-theme-accent focus:outline-none appearance-none"
+                    >
+                      <option value="none">Raw Rows</option>
+                      <option value="sum">Sum</option>
+                      <option value="mean">Average (Mean)</option>
+                      <option value="count">Count</option>
+                      <option value="min">Minimum</option>
+                      <option value="max">Maximum</option>
                     </select>
                   </div>
                 </>

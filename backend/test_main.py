@@ -261,3 +261,36 @@ def test_upload_ods_mocked():
         assert "error" not in json_response
         assert json_response["filename"] == "test.ods"
         mock_read_excel.assert_called_once()
+
+def test_insights_and_export():
+    data = "name,val\nAlice,10\nBob,1000\nCharlie,12\nDavid,11\nEve,"
+    file = io.BytesIO(data.encode("utf-8"))
+    
+    upload_resp = client.post(
+        "/api/upload",
+        files={"file": ("dataset_test.csv", file, "text/csv")}
+    )
+    assert upload_resp.status_code == 200
+    json_resp = upload_resp.json()
+    assert "insights" in json_resp
+    assert json_resp["insights"]["health_score"] >= 0
+    assert len(json_resp["insights"]["items"]) > 0
+
+    dataset_id = json_resp["dataset_id"]
+
+    # Export CSV
+    export_csv = client.get(f"/api/export/{dataset_id}?format=csv")
+    assert export_csv.status_code == 200
+    assert "text/csv" in export_csv.headers["content-type"]
+    assert "Alice" in export_csv.text
+
+    # Export JSON
+    export_json = client.get(f"/api/export/{dataset_id}?format=json")
+    assert export_json.status_code == 200
+    assert "application/json" in export_json.headers["content-type"]
+
+    # Export XLSX
+    export_xlsx = client.get(f"/api/export/{dataset_id}?format=xlsx")
+    assert export_xlsx.status_code == 200
+    assert "spreadsheetml" in export_xlsx.headers["content-type"]
+

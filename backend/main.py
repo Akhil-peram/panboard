@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Query
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import io
@@ -50,6 +51,86 @@ def clean_expired_cache():
                     os.remove(fpath)
                 except Exception:
                     pass
+def generate_insights(df: pd.DataFrame):
+    insights = []
+    total_rows = len(df)
+    if total_rows == 0:
+        return insights
+
+    # 1. Missingness Insights
+    total_cells = df.size
+    total_missing = df.isnull().sum().sum()
+    missing_pct = (total_missing / total_cells) * 100 if total_cells > 0 else 0
+
+    if missing_pct > 0:
+        for col in df.columns:
+            col_missing = df[col].isnull().sum()
+            col_pct = (col_missing / total_rows) * 100
+            if col_pct >= 20:
+                insights.append({
+                    "type": "warning",
+                    "category": "Missing Data",
+                    "title": f"High Missing Values in '{col}'",
+                    "description": f"Column '{col}' has {col_missing} missing values ({col_pct:.1f}% of rows). Consider using mean/mode imputation.",
+                    "column": col
+                })
+
+    # 2. Outlier Detection (IQR Method)
+    numeric_df = df.select_dtypes(include=['number'])
+    for col in numeric_df.columns:
+        valid_series = numeric_df[col].dropna()
+        if len(valid_series) >= 4:
+            q1 = valid_series.quantile(0.25)
+            q3 = valid_series.quantile(0.75)
+            iqr = q3 - q1
+            if iqr > 0:
+                lower_bound = q1 - 1.5 * iqr
+                upper_bound = q3 + 1.5 * iqr
+                outliers = valid_series[(valid_series < lower_bound) | (valid_series > upper_bound)]
+                outlier_count = len(outliers)
+                if outlier_count > 0:
+                    outlier_pct = (outlier_count / len(valid_series)) * 100
+                    insights.append({
+                        "type": "info" if outlier_pct < 10 else "warning",
+                        "category": "Outlier Detection",
+                        "title": f"Outliers Detected in '{col}'",
+                        "description": f"Found {outlier_count} statistical outlier(s) ({outlier_pct:.1f}%) outside bounds [{lower_bound:.2f}, {upper_bound:.2f}].",
+                        "column": col
+                    })
+
+    # 3. High Correlation Detection
+    if len(numeric_df.columns) >= 2:
+        corr_matrix = numeric_df.corr().abs()
+        cols = corr_matrix.columns
+        for i in range(len(cols)):
+            for j in range(i + 1, len(cols)):
+                c1, c2 = cols[i], cols[j]
+                val = corr_matrix.loc[c1, c2]
+                if not pd.isna(val) and val >= 0.85:
+                    insights.append({
+                        "type": "info",
+                        "category": "Correlation",
+                        "title": f"Strong Correlation ({c1} & {c2})",
+                        "description": f"Columns '{c1}' and '{c2}' are strongly correlated (r = {val:.2f}).",
+                        "column": c1
+                    })
+
+    # Health score
+    health_score = max(0, min(100, int(100 - (missing_pct * 0.8))))
+    if not insights:
+        insights.append({
+            "type": "success",
+            "category": "Data Quality",
+            "title": "Clean Dataset Profile",
+            "description": f"No critical missing values or extreme anomalies detected. Data health score: {health_score}%.",
+            "column": None
+        })
+
+    return {
+        "health_score": health_score,
+        "items": insights
+    }
+
 def analyze_dataframe(df: pd.DataFrame, filename: str, dataset_id: str):
     # Get data types and missing values
     info = pd.DataFrame({
@@ -93,6 +174,9 @@ def analyze_dataframe(df: pd.DataFrame, filename: str, dataset_id: str):
             sample_df[col] = sample_df[col].dt.strftime('%Y-%m-%d %H:%M:%S').fillna("")
     sample_data = sample_df.fillna("").to_dict(orient="records")
 
+    # Generate insights
+    insights_data = generate_insights(df)
+
     # Return comprehensive results
     return {
         "dataset_id": dataset_id,
@@ -105,12 +189,14 @@ def analyze_dataframe(df: pd.DataFrame, filename: str, dataset_id: str):
         "stats": stats,
         "categorical_summary": categorical_summary,
         "correlation": correlation,
-        "sample_data": sample_data
+        "sample_data": sample_data,
+        "insights": insights_data
     }
 
 @app.get("/")
 async def root():
     return {"message": "Dashboard as a Service API is running"}
+
 
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -264,8 +350,48 @@ async def transform_dataset(dataset_id: str, payload: dict):
     except Exception as e:
         return {"error": f"Transformation failed: {str(e)}"}
 
+@app.get("/api/export/{dataset_id}")
+async def export_dataset(dataset_id: str, format: str = Query("csv")):
+    cached = load_from_cache(dataset_id)
+    if not cached:
+        return {"error": "Dataset session not found or expired."}
+
+    df, _, original_filename = cached
+    base_name = os.path.splitext(original_filename)[0]
+
+    format = format.lower()
+    if format == "csv":
+        stream = io.StringIO()
+        df.to_csv(stream, index=False)
+        content = stream.getvalue()
+        return Response(
+            content=content,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={base_name}_transformed.csv"}
+        )
+    elif format in ["xlsx", "excel"]:
+        stream = io.BytesIO()
+        with pd.ExcelWriter(stream, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False, sheet_name="Transformed Data")
+        content = stream.getvalue()
+        return Response(
+            content=content,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={base_name}_transformed.xlsx"}
+        )
+    elif format == "json":
+        content = df.to_json(orient="records", indent=2)
+        return Response(
+            content=content,
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename={base_name}_transformed.json"}
+        )
+    else:
+        return {"error": f"Unsupported export format '{format}'. Use 'csv', 'xlsx', or 'json'."}
+
 if __name__ == "__main__":
     import uvicorn
     # Use "main:app" for import string workers support
     uvicorn.run("main:app", host="0.0.0.0", port=8000, workers=4)
+
 

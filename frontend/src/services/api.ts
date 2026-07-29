@@ -1,5 +1,18 @@
 const API_BASE_URL = 'https://panboard.onrender.com';
 
+export interface InsightItem {
+  type: 'warning' | 'info' | 'success';
+  category: string;
+  title: string;
+  description: string;
+  column?: string | null;
+}
+
+export interface InsightsData {
+  health_score: number;
+  items: InsightItem[];
+}
+
 export interface UploadResponse {
   dataset_id: string;
   filename: string;
@@ -12,6 +25,7 @@ export interface UploadResponse {
   categorical_summary: Record<string, { name: string; value: number }[]>;
   correlation: Record<string, Record<string, number>>;
   sample_data: Record<string, string | number | boolean | null>[];
+  insights?: InsightsData;
   error?: string;
 }
 
@@ -62,6 +76,10 @@ export const transformDataset = async (datasetId: string, payload: TransformPayl
     throw new Error(result.error);
   }
   return result;
+};
+
+export const getExportUrl = (datasetId: string, format: 'csv' | 'xlsx' | 'json'): string => {
+  return `${API_BASE_URL}/api/export/${datasetId}?format=${format}`;
 };
 
 
