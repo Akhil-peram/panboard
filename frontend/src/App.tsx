@@ -9,7 +9,6 @@ import {
   Sun, 
   Moon, 
   Palette, 
-  Sparkles, 
   Zap, 
   ShieldCheck, 
   FileSpreadsheet, 
@@ -128,12 +127,6 @@ function App() {
           /* Hero Section when no dataset uploaded */
           <div className="space-y-16 animate-in fade-in duration-700">
             <div className="text-center space-y-6 max-w-3xl mx-auto pt-6">
-              {/* Badge */}
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/20 text-xs font-semibold">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Next-Gen Instant Data Profiling & Analytics</span>
-              </div>
-
               {/* Main Headline */}
               <h1 className="text-4xl sm:text-6xl font-black text-theme-text tracking-tight leading-tight">
                 Turn Raw Datasets into <br />
