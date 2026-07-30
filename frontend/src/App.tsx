@@ -65,22 +65,24 @@ function App() {
       <header className="sticky top-0 z-40 bg-theme-bg/80 backdrop-blur-md border-b border-theme-border transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Brand Logo */}
-          <div 
+          <button 
+            type="button"
             onClick={() => setData(null)} 
-            className="flex items-center space-x-3 cursor-pointer group"
+            aria-label="Panboard Home, upload or reset dataset workspace"
+            className="flex items-center space-x-3 cursor-pointer group text-left bg-transparent border-0 p-0 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 rounded-xl"
           >
             <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform duration-300">
-              <BarChart3 className="h-5 w-5 text-white" />
+              <BarChart3 aria-hidden="true" className="h-5 w-5 text-white" />
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-xl font-black tracking-tight text-theme-text">
                 Pan<span className="text-indigo-500">board</span>
               </span>
-              <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/20">
+              <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-500/20">
                 DaaS v2.0
               </span>
             </div>
-          </div>
+          </button>
 
           {/* Right Action Items */}
           <div className="flex items-center space-x-3">
@@ -89,7 +91,8 @@ function App() {
               href="https://github.com/Akhil-peram/panboard"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-theme-sub hover:text-theme-text bg-theme-card hover:bg-theme-border rounded-xl transition-all border border-theme-border"
+              aria-label="View Panboard repository on GitHub (opens in new tab)"
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-theme-sub hover:text-theme-text bg-theme-card hover:bg-theme-border rounded-xl transition-all border border-theme-border focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               title="View on GitHub"
             >
               <GithubIcon className="h-4 w-4" />
@@ -98,22 +101,26 @@ function App() {
 
             {/* Theme Toggle Button */}
             <button
+              type="button"
               onClick={toggleTheme}
-              className="p-2 text-theme-sub hover:text-theme-text bg-theme-card hover:bg-theme-border rounded-xl transition-all border border-theme-border cursor-pointer"
+              aria-label={`Toggle visual theme, current theme is ${theme}`}
+              className="p-2 text-theme-sub hover:text-theme-text bg-theme-card hover:bg-theme-border rounded-xl transition-all border border-theme-border cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               title={`Theme: ${theme.toUpperCase()}`}
             >
-              {theme === 'light' && <Sun className="h-4 w-4 text-amber-500" />}
-              {theme === 'dark' && <Moon className="h-4 w-4 text-indigo-400" />}
-              {theme === 'tokyo-night' && <Palette className="h-4 w-4 text-cyan-400" />}
+              {theme === 'light' && <Sun aria-hidden="true" className="h-4 w-4 text-amber-500" />}
+              {theme === 'dark' && <Moon aria-hidden="true" className="h-4 w-4 text-indigo-400" />}
+              {theme === 'tokyo-night' && <Palette aria-hidden="true" className="h-4 w-4 text-cyan-400" />}
             </button>
 
             {/* Reset / Upload New Dataset Button */}
             {data && (
               <button 
+                type="button"
                 onClick={() => setData(null)}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+                aria-label="Upload new dataset file"
+                className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               >
-                <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                <RefreshCw aria-hidden="true" className="h-3.5 w-3.5 mr-1" />
                 <span>New Upload</span>
               </button>
             )}
@@ -314,15 +321,22 @@ function App() {
 
       {/* Footer Modals */}
       {activeFooterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-300">
+        <div 
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="footer-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-300"
+        >
           <div className="bg-theme-card rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-theme-border animate-in zoom-in-95 duration-300 space-y-6 max-h-[85vh] flex flex-col">
             <div className="flex justify-between items-center pb-3 border-b border-theme-border">
-              <h3 className="text-lg font-bold text-theme-text capitalize">
+              <h3 id="footer-modal-title" className="text-lg font-bold text-theme-text capitalize">
                 {activeFooterModal === 'support' ? 'Contact Support' : `${activeFooterModal} Policy`}
               </h3>
               <button 
+                type="button"
                 onClick={() => setActiveFooterModal(null)}
-                className="text-theme-sub hover:text-theme-text text-sm font-semibold p-1 hover:bg-theme-border rounded-lg transition-all cursor-pointer"
+                aria-label="Close modal dialog"
+                className="text-theme-sub hover:text-theme-text text-sm font-semibold p-1 hover:bg-theme-border rounded-lg transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               >
                 ✕
               </button>
@@ -355,8 +369,9 @@ function App() {
                 <form onSubmit={(e) => { e.preventDefault(); alert('Support message sent successfully!'); setActiveFooterModal(null); }} className="space-y-4">
                   <p>Need assistance or have feature requests? Send us a message and we'll reply promptly.</p>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-theme-sub uppercase tracking-wider">Your Email</label>
+                    <label htmlFor="support-email-input" className="text-[10px] font-bold text-theme-sub uppercase tracking-wider block">Your Email</label>
                     <input 
+                      id="support-email-input"
                       type="email" 
                       required
                       placeholder="you@example.com" 
@@ -364,8 +379,9 @@ function App() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-theme-sub uppercase tracking-wider">Message</label>
+                    <label htmlFor="support-message-input" className="text-[10px] font-bold text-theme-sub uppercase tracking-wider block">Message</label>
                     <textarea 
+                      id="support-message-input"
                       required
                       rows={4}
                       placeholder="Describe your issue or feedback..." 

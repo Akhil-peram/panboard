@@ -435,101 +435,124 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Tab Navigation */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between bg-theme-card p-2 rounded-2xl shadow-sm border border-theme-border gap-3">
-        <div className="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1 md:pb-0">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
-              activeTab === 'overview' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
-            }`}
-          >
-            <LayoutDashboard className="h-4 w-4 mr-2 shrink-0" />
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('charts')}
-            className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
-              activeTab === 'charts' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
-            }`}
-          >
-            <BarChart3 className="h-4 w-4 mr-2 shrink-0" />
-            Visualize
-          </button>
-          <button
-            onClick={() => setActiveTab('data')}
-            className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
-              activeTab === 'data' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
-            }`}
-          >
-            <TableIcon className="h-4 w-4 mr-2 shrink-0" />
-            Data Table
-          </button>
-        </div>
-        <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-3 px-2 sm:px-4">
-          <div className="text-xs text-theme-sub font-medium flex items-center truncate">
-            <Activity className="h-3 w-3 mr-1.5 text-green-500 shrink-0" />
-            <span className="truncate">{data.filename} • {data.row_count} rows</span>
-          </div>
-          <div className="flex items-center space-x-2 shrink-0">
-            {/* Export Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowExportDropdown(!showExportDropdown)}
-                className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-xl transition-all duration-300 border border-indigo-500/20"
-                title="Export cleaned dataset"
-              >
-                <Download className="h-3.5 w-3.5 mr-1 shrink-0" />
-                <span>Export</span>
-                <ChevronDown className="h-3 w-3 ml-0.5 shrink-0" />
-              </button>
-              {showExportDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-theme-card border border-theme-border rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                  <a
-                    href={getExportUrl(data.dataset_id, 'csv')}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => setShowExportDropdown(false)}
-                    className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
-                  >
-                    <FileText className="h-4 w-4 mr-2 text-emerald-400" />
-                    CSV File (.csv)
-                  </a>
-                  <a
-                    href={getExportUrl(data.dataset_id, 'xlsx')}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => setShowExportDropdown(false)}
-                    className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
-                  >
-                    <FileSpreadsheet className="h-4 w-4 mr-2 text-blue-400" />
-                    Excel Workbook (.xlsx)
-                  </a>
-                  <a
-                    href={getExportUrl(data.dataset_id, 'json')}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => setShowExportDropdown(false)}
-                    className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
-                  >
-                    <FileCode className="h-4 w-4 mr-2 text-amber-400" />
-                    JSON Format (.json)
-                  </a>
-                </div>
-              )}
-            </div>
-            <button 
-              onClick={handleResetDataset}
-              className="flex items-center px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all duration-300 border border-rose-500/20"
-              title="Revert all cleaning, transformations, and filters."
+      <nav aria-label="Dashboard views" className="bg-theme-card p-2 rounded-2xl shadow-sm border border-theme-border">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div role="tablist" aria-label="Dashboard view tabs" className="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1 md:pb-0">
+            <button
+              type="button"
+              role="tab"
+              id="tab-overview"
+              aria-selected={activeTab === 'overview'}
+              aria-controls="tabpanel-overview"
+              onClick={() => setActiveTab('overview')}
+              className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 focus:outline-none focus:ring-2 focus:ring-theme-accent/40 ${
+                activeTab === 'overview' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
+              }`}
             >
-              Reset
+              <LayoutDashboard aria-hidden="true" className="h-4 w-4 mr-2 shrink-0" />
+              Overview
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-charts"
+              aria-selected={activeTab === 'charts'}
+              aria-controls="tabpanel-charts"
+              onClick={() => setActiveTab('charts')}
+              className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 focus:outline-none focus:ring-2 focus:ring-theme-accent/40 ${
+                activeTab === 'charts' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
+              }`}
+            >
+              <BarChart3 aria-hidden="true" className="h-4 w-4 mr-2 shrink-0" />
+              Visualize
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-data"
+              aria-selected={activeTab === 'data'}
+              aria-controls="tabpanel-data"
+              onClick={() => setActiveTab('data')}
+              className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 focus:outline-none focus:ring-2 focus:ring-theme-accent/40 ${
+                activeTab === 'data' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
+              }`}
+            >
+              <TableIcon aria-hidden="true" className="h-4 w-4 mr-2 shrink-0" />
+              Data Table
             </button>
           </div>
+          <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-3 px-2 sm:px-4">
+            <div className="text-xs text-theme-sub font-medium flex items-center truncate">
+              <Activity aria-hidden="true" className="h-3 w-3 mr-1.5 text-green-500 shrink-0" />
+              <span className="truncate">{data.filename} • {data.row_count} rows</span>
+            </div>
+            <div className="flex items-center space-x-2 shrink-0">
+              {/* Export Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-haspopup="true"
+                  aria-expanded={showExportDropdown}
+                  aria-label="Export cleaned dataset format options"
+                  onClick={() => setShowExportDropdown(!showExportDropdown)}
+                  className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded-xl transition-all duration-300 border border-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-theme-accent/40"
+                  title="Export cleaned dataset"
+                >
+                  <Download aria-hidden="true" className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  <span>Export</span>
+                  <ChevronDown aria-hidden="true" className="h-3 w-3 ml-0.5 shrink-0" />
+                </button>
+                {showExportDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-theme-card border border-theme-border rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <a
+                      href={getExportUrl(data.dataset_id, 'csv')}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => setShowExportDropdown(false)}
+                      className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                    >
+                      <FileText aria-hidden="true" className="h-4 w-4 mr-2 text-emerald-400" />
+                      CSV File (.csv)
+                    </a>
+                    <a
+                      href={getExportUrl(data.dataset_id, 'xlsx')}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => setShowExportDropdown(false)}
+                      className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                    >
+                      <FileSpreadsheet aria-hidden="true" className="h-4 w-4 mr-2 text-blue-400" />
+                      Excel Workbook (.xlsx)
+                    </a>
+                    <a
+                      href={getExportUrl(data.dataset_id, 'json')}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => setShowExportDropdown(false)}
+                      className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                    >
+                      <FileCode aria-hidden="true" className="h-4 w-4 mr-2 text-amber-400" />
+                      JSON Format (.json)
+                    </a>
+                  </div>
+                )}
+              </div>
+              <button 
+                type="button"
+                onClick={handleResetDataset}
+                aria-label="Reset dataset filters and transformations"
+                className="flex items-center px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all duration-300 border border-rose-500/20 focus:outline-none focus:ring-2 focus:ring-rose-500/40"
+                title="Revert all cleaning, transformations, and filters."
+              >
+                Reset
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      </nav>
 
       {activeTab === 'overview' && (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div id="tabpanel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-8 animate-in fade-in duration-500">
           {/* AI Data Insights & Health Score */}
           {data.insights && (
             <div className="bg-theme-card p-4 sm:p-6 rounded-2xl shadow-sm border border-theme-border space-y-4">
@@ -760,21 +783,23 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
       )}
 
       {activeTab === 'charts' && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 animate-in fade-in slide-in-from-right-4 duration-500">
+        <div id="tabpanel-charts" role="tabpanel" aria-labelledby="tab-charts" className="grid grid-cols-1 lg:grid-cols-4 gap-8 animate-in fade-in slide-in-from-right-4 duration-500">
           {/* Controls Panel */}
           <div className="bg-theme-card p-6 rounded-2xl shadow-sm border border-theme-border space-y-6 h-fit">
             <h3 className="text-sm font-bold text-theme-text uppercase tracking-wider flex items-center">
-              <Filter className="h-4 w-4 mr-2 text-theme-accent" />
+              <Filter aria-hidden="true" className="h-4 w-4 mr-2 text-theme-accent" />
               Chart Settings
             </h3>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Visual Type</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div role="group" aria-label="Select chart visual type" className="grid grid-cols-2 gap-2">
                   {(['bar', 'line', 'area', 'scatter', 'pie'] as const).map((type) => (
                     <button
                       key={type}
+                      type="button"
+                      aria-pressed={chartType === type}
                       onClick={() => setChartType(type)}
                       className={`px-3 py-2 rounded-lg text-xs font-semibold capitalize border transition-all ${
                         chartType === type 
@@ -791,8 +816,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
               {chartType !== 'pie' && (
                 <>
                   <div>
-                    <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">X-Axis (Labels)</label>
+                    <label htmlFor="chart-x-axis-select" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">X-Axis (Labels)</label>
                     <select 
+                      id="chart-x-axis-select"
+                      aria-label="X-Axis column"
                       value={xAxis} 
                       onChange={(e) => setXAxis(e.target.value)}
                       className="w-full bg-theme-bg border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text focus:ring-2 focus:ring-theme-accent focus:outline-none appearance-none"
@@ -801,8 +828,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Y-Axis (Values)</label>
+                    <label htmlFor="chart-y-axis-select" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Y-Axis (Values)</label>
                     <select 
+                      id="chart-y-axis-select"
+                      aria-label="Y-Axis column"
                       value={yAxis} 
                       onChange={(e) => setYAxis(e.target.value)}
                       className="w-full bg-theme-bg border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text focus:ring-2 focus:ring-theme-accent focus:outline-none appearance-none"
@@ -812,8 +841,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Aggregation</label>
+                    <label htmlFor="chart-agg-func-select" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Aggregation</label>
                     <select 
+                      id="chart-agg-func-select"
+                      aria-label="Aggregation method"
                       value={aggFunc} 
                       onChange={(e) => setAggFunc(e.target.value as any)}
                       className="w-full bg-theme-bg border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text focus:ring-2 focus:ring-theme-accent focus:outline-none appearance-none"
@@ -831,8 +862,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
 
               {chartType === 'pie' && (
                 <div>
-                  <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Select Category</label>
+                  <label htmlFor="chart-category-select" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Select Category</label>
                   <select 
+                    id="chart-category-select"
+                    aria-label="Select category column for pie chart"
                     value={xAxis} 
                     onChange={(e) => setXAxis(e.target.value)}
                     className="w-full bg-theme-bg border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text focus:ring-2 focus:ring-theme-accent focus:outline-none appearance-none"
@@ -844,8 +877,11 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
               )}
 
               <div>
-                <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Sample Size: {sampleSize}</label>
+                <label htmlFor="chart-sample-size-range" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Sample Size: {sampleSize}</label>
                 <input 
+                  id="chart-sample-size-range"
+                  aria-label="Chart sample size"
+                  aria-valuenow={sampleSize}
                   type="range" min="5" max="100" step="5"
                   value={sampleSize}
                   onChange={(e) => setSampleSize(parseInt(e.target.value))}
@@ -856,17 +892,21 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
 
             <div className="flex flex-col gap-2 pt-2">
               <button 
+                type="button"
                 onClick={handleExportPNG}
+                aria-label="Export visualization chart as PNG image"
                 className="w-full flex items-center justify-center px-4 py-2.5 bg-theme-accent text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity"
               >
-                <Download className="h-3.5 w-3.5 mr-2" />
+                <Download aria-hidden="true" className="h-3.5 w-3.5 mr-2" />
                 Export as PNG
               </button>
               <button 
+                type="button"
                 onClick={handleExportSVG}
+                aria-label="Export visualization chart as SVG vector image"
                 className="w-full flex items-center justify-center px-4 py-2.5 bg-theme-text text-theme-card rounded-xl text-xs font-bold hover:opacity-90 transition-opacity border border-theme-border"
               >
-                <Download className="h-3.5 w-3.5 mr-2" />
+                <Download aria-hidden="true" className="h-3.5 w-3.5 mr-2" />
                 Export as SVG
               </button>
             </div>
@@ -894,7 +934,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
       )}
 
       {activeTab === 'data' && (
-        <div className="bg-theme-card rounded-2xl shadow-sm border border-theme-border overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+        <div id="tabpanel-data" role="tabpanel" aria-labelledby="tab-data" className="bg-theme-card rounded-2xl shadow-sm border border-theme-border overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="px-8 py-6 border-b border-theme-border flex flex-col gap-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
@@ -906,16 +946,20 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
               </div>
               <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                 <div className="relative w-full md:w-72">
-                  <Search className="h-4 w-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-theme-sub" />
+                  <Search aria-hidden="true" className="h-4 w-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-theme-sub" />
                   <input 
                     type="text" 
                     placeholder="Search in data..." 
+                    aria-label="Search in dataset records"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 bg-theme-bg border border-theme-border rounded-xl text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent transition-all"
                   />
                 </div>
                 <button
+                  type="button"
+                  aria-expanded={showFilterBar}
+                  aria-label="Toggle dataset column filter toolbar"
                   onClick={() => {
                     setShowFilterBar(!showFilterBar);
                     if (!filterCol && columns.length > 0) setFilterCol(columns[0]);
@@ -924,7 +968,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                     showFilterBar ? 'bg-theme-accent-bg border-theme-accent/55 text-theme-accent-text' : 'bg-theme-card border-theme-border text-theme-text hover:border-theme-accent'
                   }`}
                 >
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter aria-hidden="true" className="h-4 w-4 mr-2" />
                   Filter Dataset
                 </button>
               </div>
@@ -933,8 +977,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
             {showFilterBar && (
               <div className="p-4 bg-theme-bg rounded-2xl border border-theme-border flex flex-wrap items-end gap-4 animate-in slide-in-from-top duration-300">
                 <div className="flex flex-col">
-                  <label className="text-[10px] font-bold text-theme-sub uppercase mb-1 tracking-wider">Column</label>
+                  <label htmlFor="dataset-filter-column" className="text-[10px] font-bold text-theme-sub uppercase mb-1 tracking-wider">Column</label>
                   <select
+                    id="dataset-filter-column"
+                    aria-label="Select column to filter by"
                     value={filterCol}
                     onChange={(e) => setFilterCol(e.target.value)}
                     className="bg-theme-card border border-theme-border rounded-xl px-3 py-2 text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent/20"
@@ -944,8 +990,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                 </div>
                 
                 <div className="flex flex-col">
-                  <label className="text-[10px] font-bold text-theme-sub uppercase mb-1 tracking-wider">Operator</label>
+                  <label htmlFor="dataset-filter-operator" className="text-[10px] font-bold text-theme-sub uppercase mb-1 tracking-wider">Operator</label>
                   <select
+                    id="dataset-filter-operator"
+                    aria-label="Select comparison operator"
                     value={filterOp}
                     onChange={(e) => setFilterOp(e.target.value)}
                     className="bg-theme-card border border-theme-border rounded-xl px-3 py-2 text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent/20"
@@ -961,8 +1009,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                 </div>
 
                 <div className="flex flex-col flex-1 min-w-[120px]">
-                  <label className="text-[10px] font-bold text-theme-sub uppercase mb-1 tracking-wider">Comparison Value</label>
+                  <label htmlFor="dataset-filter-value" className="text-[10px] font-bold text-theme-sub uppercase mb-1 tracking-wider">Comparison Value</label>
                   <input
+                    id="dataset-filter-value"
+                    aria-label="Enter comparison value for filter"
                     type="text"
                     placeholder="Enter value..."
                     value={filterVal}
@@ -973,6 +1023,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
 
                 <div>
                   <button
+                    type="button"
                     onClick={handleApplyFilter}
                     disabled={isFiltering}
                     className="px-5 py-2.5 bg-theme-accent hover:opacity-90 disabled:bg-theme-accent/50 text-white text-xs font-bold rounded-xl shadow-md transition-all h-[38px] flex items-center"
@@ -991,14 +1042,15 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                     <th 
                       key={col} 
                       onClick={() => handleSortClick(col)}
+                      aria-sort={sortCol === col ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                       className="px-6 py-4 text-left text-xs font-bold text-theme-sub uppercase tracking-wider cursor-pointer hover:bg-theme-border hover:text-theme-text transition-colors select-none group"
                     >
                       <div className="flex items-center space-x-1">
                         <span>{col}</span>
                         {sortCol === col ? (
-                          sortDirection === 'asc' ? <span className="text-theme-accent">▲</span> : <span className="text-theme-accent">▼</span>
+                          sortDirection === 'asc' ? <span className="text-theme-accent" aria-hidden="true">▲</span> : <span className="text-theme-accent" aria-hidden="true">▼</span>
                         ) : (
-                          <span className="opacity-30 group-hover:opacity-100 transition-opacity">⇅</span>
+                          <span className="opacity-30 group-hover:opacity-100 transition-opacity" aria-hidden="true">⇅</span>
                         )}
                       </div>
                     </th>
@@ -1019,7 +1071,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
             </table>
             {sortedFilteredData.length === 0 && (
               <div className="p-12 text-center text-theme-sub">
-                <Search className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                <Search aria-hidden="true" className="h-8 w-8 mx-auto mb-3 opacity-20" />
                 <p>No matches found for "{searchTerm}"</p>
               </div>
             )}
@@ -1029,19 +1081,26 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
 
       {/* Transformation Modal */}
       {transformingCol && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+        <div 
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="transform-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
+        >
           <div className="bg-theme-card rounded-[2rem] max-w-md w-full p-8 shadow-2xl border border-theme-border animate-in zoom-in-95 duration-300 space-y-6">
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-theme-accent-text bg-theme-accent-bg px-2.5 py-1 rounded-md">
                   {transformingCol.action === 'impute' ? 'Data Imputation' : transformingCol.action === 'rename' ? 'Rename Column' : 'Type Casting'}
                 </span>
-                <h3 className="text-xl font-bold text-theme-text mt-2">
+                <h3 id="transform-modal-title" className="text-xl font-bold text-theme-text mt-2">
                   {transformingCol.name}
                 </h3>
               </div>
               <button 
+                type="button"
                 onClick={() => setTransformingCol(null)}
+                aria-label="Close transformation dialog"
                 className="text-theme-sub hover:text-theme-text text-sm font-semibold p-1 hover:bg-theme-border rounded-lg transition-all"
               >
                 ✕
@@ -1051,8 +1110,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
             {transformingCol.action === 'impute' ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Strategy</label>
+                  <label htmlFor="impute-strategy-select" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Strategy</label>
                   <select 
+                    id="impute-strategy-select"
+                    aria-label="Select missing value imputation strategy"
                     value={imputeStrategy}
                     onChange={(e: any) => setImputeStrategy(e.target.value)}
                     className="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent appearance-none"
@@ -1073,8 +1134,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
 
                 {imputeStrategy === 'value' && (
                   <div className="animate-in slide-in-from-top duration-300">
-                    <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Custom Value</label>
+                    <label htmlFor="impute-custom-value-input" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Custom Value</label>
                     <input
+                      id="impute-custom-value-input"
+                      aria-label="Custom imputation value"
                       type="text"
                       placeholder="Enter value..."
                       value={imputeValue}
@@ -1087,8 +1150,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
             ) : transformingCol.action === 'rename' ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">New Column Name</label>
+                  <label htmlFor="rename-column-input" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">New Column Name</label>
                   <input
+                    id="rename-column-input"
+                    aria-label="New column name"
                     type="text"
                     placeholder="Enter new column name..."
                     value={imputeValue}
@@ -1100,8 +1165,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Target Data Type</label>
+                  <label htmlFor="cast-type-select" className="block text-[10px] font-bold text-theme-sub uppercase mb-1.5 tracking-wider">Target Data Type</label>
                   <select 
+                    id="cast-type-select"
+                    aria-label="Target column data type"
                     value={castType}
                     onChange={(e: any) => setCastType(e.target.value)}
                     className="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent appearance-none"

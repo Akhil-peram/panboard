@@ -79,6 +79,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
       >
         <input
           type="file"
+          aria-label="Upload dataset file in CSV, Excel, or ODS format"
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
           onChange={handleFileInput}
           accept=".csv,.xls,.xlsx,.xlsm,.xlsb,.ods"
@@ -90,11 +91,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
             isUploading ? 'bg-indigo-100' : isSuccess ? 'bg-emerald-100' : 'bg-theme-bg group-hover:bg-theme-border'
           }`}>
             {isUploading ? (
-              <Loader2 className="h-10 w-10 text-indigo-600 animate-spin" />
+              <Loader2 aria-hidden="true" className="h-10 w-10 text-indigo-600 animate-spin" />
             ) : isSuccess ? (
-              <CheckCircle2 className="h-10 w-10 text-emerald-600 animate-bounce" />
+              <CheckCircle2 aria-hidden="true" className="h-10 w-10 text-emerald-600 animate-bounce" />
             ) : (
-              <UploadCloud className={`h-10 w-10 transition-colors duration-500 ${isDragging ? 'text-indigo-600' : 'text-theme-sub group-hover:text-theme-accent'}`} />
+              <UploadCloud aria-hidden="true" className={`h-10 w-10 transition-colors duration-500 ${isDragging ? 'text-indigo-600' : 'text-theme-sub group-hover:text-theme-accent'}`} />
             )}
           </div>
           
