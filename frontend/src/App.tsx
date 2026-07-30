@@ -198,21 +198,21 @@ function App() {
           /* Active Dashboard Workspace */
           <div className="space-y-8 animate-in fade-in duration-500">
             {/* Active File Toolbar Banner */}
-            <div className="flex flex-col sm:flex-row justify-between items-center bg-theme-card px-6 py-4 rounded-2xl shadow-sm border border-theme-border gap-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center bg-theme-card px-4 sm:px-6 py-4 rounded-2xl shadow-sm border border-theme-border gap-4">
+              <div className="flex items-center space-x-3 min-w-0 flex-1">
+                <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl shrink-0">
                   <Layers className="h-5 w-5" />
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold text-theme-text truncate max-w-xs sm:max-w-md">{data.filename}</h2>
-                  <p className="text-[11px] font-semibold text-theme-sub">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base sm:text-lg font-bold text-theme-text truncate">{data.filename}</h2>
+                  <p className="text-[11px] font-semibold text-theme-sub truncate">
                     Session ID: <span className="font-mono text-indigo-400">{data.dataset_id.slice(0, 8)}...</span> • {data.row_count} rows • {data.columns.length} columns
                   </p>
                 </div>
               </div>
               <button 
                 onClick={() => setData(null)}
-                className="group flex items-center px-4 py-2 text-xs font-bold text-theme-text hover:text-indigo-400 bg-theme-bg hover:bg-theme-border rounded-xl transition-all border border-theme-border cursor-pointer"
+                className="group flex items-center justify-center shrink-0 px-4 py-2 text-xs font-bold text-theme-text hover:text-indigo-400 bg-theme-bg hover:bg-theme-border rounded-xl transition-all border border-theme-border cursor-pointer"
               >
                 <RefreshCw className="h-3.5 w-3.5 mr-2 transition-transform group-hover:rotate-180 duration-500" />
                 Upload Different File

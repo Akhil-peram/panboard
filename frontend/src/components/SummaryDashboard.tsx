@@ -435,94 +435,96 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Tab Navigation */}
-      <div className="flex items-center justify-between bg-theme-card p-2 rounded-2xl shadow-sm border border-theme-border flex-wrap gap-2">
-        <div className="flex space-x-1">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between bg-theme-card p-2 rounded-2xl shadow-sm border border-theme-border gap-3">
+        <div className="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1 md:pb-0">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`flex items-center px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
               activeTab === 'overview' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
             }`}
           >
-            <LayoutDashboard className="h-4 w-4 mr-2" />
+            <LayoutDashboard className="h-4 w-4 mr-2 shrink-0" />
             Overview
           </button>
           <button
             onClick={() => setActiveTab('charts')}
-            className={`flex items-center px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
               activeTab === 'charts' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
             }`}
           >
-            <BarChart3 className="h-4 w-4 mr-2" />
+            <BarChart3 className="h-4 w-4 mr-2 shrink-0" />
             Visualize
           </button>
           <button
             onClick={() => setActiveTab('data')}
-            className={`flex items-center px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            className={`flex items-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
               activeTab === 'data' ? 'bg-theme-accent-bg text-theme-accent-text shadow-sm' : 'text-theme-sub hover:bg-theme-border'
             }`}
           >
-            <TableIcon className="h-4 w-4 mr-2" />
+            <TableIcon className="h-4 w-4 mr-2 shrink-0" />
             Data Table
           </button>
         </div>
-        <div className="flex items-center space-x-3 px-4">
-          <div className="text-xs text-theme-sub font-medium flex items-center">
-            <Activity className="h-3 w-3 mr-1.5 text-green-500" />
-            {data.filename} • {data.row_count} rows
+        <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-3 px-2 sm:px-4">
+          <div className="text-xs text-theme-sub font-medium flex items-center truncate">
+            <Activity className="h-3 w-3 mr-1.5 text-green-500 shrink-0" />
+            <span className="truncate">{data.filename} • {data.row_count} rows</span>
           </div>
-          {/* Export Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowExportDropdown(!showExportDropdown)}
-              className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-xl transition-all duration-300 border border-indigo-500/20"
-              title="Export cleaned dataset"
+          <div className="flex items-center space-x-2 shrink-0">
+            {/* Export Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowExportDropdown(!showExportDropdown)}
+                className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-xl transition-all duration-300 border border-indigo-500/20"
+                title="Export cleaned dataset"
+              >
+                <Download className="h-3.5 w-3.5 mr-1 shrink-0" />
+                <span>Export</span>
+                <ChevronDown className="h-3 w-3 ml-0.5 shrink-0" />
+              </button>
+              {showExportDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-theme-card border border-theme-border rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                  <a
+                    href={getExportUrl(data.dataset_id, 'csv')}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => setShowExportDropdown(false)}
+                    className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                  >
+                    <FileText className="h-4 w-4 mr-2 text-emerald-400" />
+                    CSV File (.csv)
+                  </a>
+                  <a
+                    href={getExportUrl(data.dataset_id, 'xlsx')}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => setShowExportDropdown(false)}
+                    className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                  >
+                    <FileSpreadsheet className="h-4 w-4 mr-2 text-blue-400" />
+                    Excel Workbook (.xlsx)
+                  </a>
+                  <a
+                    href={getExportUrl(data.dataset_id, 'json')}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => setShowExportDropdown(false)}
+                    className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
+                  >
+                    <FileCode className="h-4 w-4 mr-2 text-amber-400" />
+                    JSON Format (.json)
+                  </a>
+                </div>
+              )}
+            </div>
+            <button 
+              onClick={handleResetDataset}
+              className="flex items-center px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all duration-300 border border-rose-500/20"
+              title="Revert all cleaning, transformations, and filters."
             >
-              <Download className="h-3.5 w-3.5 mr-1" />
-              <span>Export Data</span>
-              <ChevronDown className="h-3 w-3 ml-0.5" />
+              Reset
             </button>
-            {showExportDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-theme-card border border-theme-border rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <a
-                  href={getExportUrl(data.dataset_id, 'csv')}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setShowExportDropdown(false)}
-                  className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
-                >
-                  <FileText className="h-4 w-4 mr-2 text-emerald-400" />
-                  CSV File (.csv)
-                </a>
-                <a
-                  href={getExportUrl(data.dataset_id, 'xlsx')}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setShowExportDropdown(false)}
-                  className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
-                >
-                  <FileSpreadsheet className="h-4 w-4 mr-2 text-blue-400" />
-                  Excel Workbook (.xlsx)
-                </a>
-                <a
-                  href={getExportUrl(data.dataset_id, 'json')}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setShowExportDropdown(false)}
-                  className="flex items-center px-4 py-2 text-xs font-medium text-theme-text hover:bg-theme-border transition-colors"
-                >
-                  <FileCode className="h-4 w-4 mr-2 text-amber-400" />
-                  JSON Format (.json)
-                </a>
-              </div>
-            )}
           </div>
-          <button 
-            onClick={handleResetDataset}
-            className="flex items-center px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all duration-300 border border-rose-500/20"
-            title="Revert all cleaning, transformations, and filters."
-          >
-            Reset
-          </button>
         </div>
       </div>
 
@@ -530,20 +532,20 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
         <div className="space-y-8 animate-in fade-in duration-500">
           {/* AI Data Insights & Health Score */}
           {data.insights && (
-            <div className="bg-theme-card p-6 rounded-2xl shadow-sm border border-theme-border space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-4 border-b border-theme-border pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl">
+            <div className="bg-theme-card p-4 sm:p-6 rounded-2xl shadow-sm border border-theme-border space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-theme-border pb-4">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl shrink-0">
                     <Sparkles className="h-5 w-5" />
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-theme-text flex items-center">
+                  <div className="min-w-0">
+                    <h3 className="text-sm sm:text-base font-bold text-theme-text flex items-center truncate">
                       Automated Data Quality & Audit
                     </h3>
-                    <p className="text-xs text-theme-sub">Real-time statistical anomaly and missingness checks</p>
+                    <p className="text-xs text-theme-sub truncate">Real-time statistical anomaly and missingness checks</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 bg-theme-bg px-4 py-2 rounded-xl border border-theme-border">
+                <div className="flex items-center justify-between w-full sm:w-auto space-x-3 bg-theme-bg px-4 py-2 rounded-xl border border-theme-border shrink-0">
                   <span className="text-xs font-semibold text-theme-sub">Data Health Score:</span>
                   <span className={`text-sm font-extrabold ${data.insights.health_score >= 80 ? 'text-emerald-400' : data.insights.health_score >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>
                     {data.insights.health_score}%
@@ -560,12 +562,12 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                     ) : (
                       <Info className="h-5 w-5 text-indigo-400 shrink-0 mt-0.5" />
                     )}
-                    <div>
-                      <div className="flex items-center space-x-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center flex-wrap gap-2">
                         <span className="text-xs font-bold text-theme-text">{item.title}</span>
-                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-theme-card text-theme-sub border border-theme-border">{item.category}</span>
+                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-theme-card text-theme-sub border border-theme-border shrink-0">{item.category}</span>
                       </div>
-                      <p className="text-xs text-theme-sub mt-1">{item.description}</p>
+                      <p className="text-xs text-theme-sub mt-1 leading-relaxed">{item.description}</p>
                     </div>
                   </div>
                 ))}
@@ -627,30 +629,32 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                               <span className="text-xs text-theme-sub">{healthScore}%</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
-                            {info[col].missing > 0 && (
+                          <td className="px-4 sm:px-6 py-4 text-right">
+                            <div className="flex flex-wrap items-center justify-end gap-1.5 min-w-[180px]">
+                              {info[col].missing > 0 && (
+                                <button
+                                  onClick={() => startTransform(col, 'impute')}
+                                  className="inline-flex items-center px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-bold rounded-lg transition-all duration-300"
+                                >
+                                  <Wand2 className="h-3 w-3 mr-1" />
+                                  Impute
+                                </button>
+                              )}
                               <button
-                                onClick={() => startTransform(col, 'impute')}
-                                className="inline-flex items-center px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-bold rounded-lg transition-all duration-300"
+                                onClick={() => startTransform(col, 'cast')}
+                                className="inline-flex items-center px-2.5 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-bold rounded-lg transition-all duration-300"
                               >
-                                <Wand2 className="h-3 w-3 mr-1" />
-                                Impute
+                                <Settings className="h-3 w-3 mr-1" />
+                                Cast
                               </button>
-                            )}
-                            <button
-                              onClick={() => startTransform(col, 'cast')}
-                              className="inline-flex items-center px-2.5 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-bold rounded-lg transition-all duration-300"
-                            >
-                              <Settings className="h-3 w-3 mr-1" />
-                              Cast
-                            </button>
-                            <button
-                              onClick={() => startTransform(col, 'rename')}
-                              className="inline-flex items-center px-2.5 py-1.5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 text-xs font-bold rounded-lg transition-all duration-300"
-                            >
-                              <Type className="h-3 w-3 mr-1" />
-                              Rename
-                            </button>
+                              <button
+                                onClick={() => startTransform(col, 'rename')}
+                                className="inline-flex items-center px-2.5 py-1.5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 text-xs font-bold rounded-lg transition-all duration-300"
+                              >
+                                <Type className="h-3 w-3 mr-1" />
+                                Rename
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -690,10 +694,10 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
 
           {/* Correlation Heatmap Section */}
           {numeric_columns.length > 1 && data.correlation && (
-            <div className="bg-theme-card rounded-2xl shadow-sm border border-theme-border overflow-hidden p-8 space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-theme-border">
+            <div className="bg-theme-card rounded-2xl shadow-sm border border-theme-border overflow-hidden p-4 sm:p-8 space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-4 border-b border-theme-border">
                 <h3 className="text-sm font-bold text-theme-text uppercase tracking-wider flex items-center">
-                  <Activity className="h-4 w-4 mr-2 text-theme-accent" />
+                  <Activity className="h-4 w-4 mr-2 text-theme-accent shrink-0" />
                   Feature Correlation Matrix
                 </h3>
                 <span className="text-xs text-theme-sub font-medium">Pearson coefficient (-1 to +1)</span>
