@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 
 const GithubIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+  <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="currentColor">
     <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
   </svg>
 )
@@ -137,7 +137,7 @@ function App() {
               {/* Main Headline */}
               <h1 className="text-4xl sm:text-6xl font-black text-theme-text tracking-tight leading-tight">
                 Turn Raw Datasets into <br />
-                <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 dark:from-indigo-400 dark:via-purple-400 dark:to-cyan-400 bg-clip-text text-transparent">
                   Interactive Dashboards
                 </span>
               </h1>
@@ -171,30 +171,30 @@ function App() {
             {/* Feature Cards Showcase */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
               <div className="bg-theme-card p-6 rounded-2xl border border-theme-border space-y-3 hover:border-indigo-500/40 transition-colors group">
-                <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl w-fit group-hover:scale-110 transition-transform">
-                  <Zap className="h-6 w-6" />
+                <div className="p-3 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 rounded-xl w-fit group-hover:scale-110 transition-transform">
+                  <Zap aria-hidden="true" className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-bold text-theme-text">Instant Data Profiling</h3>
+                <h2 className="text-lg font-bold text-theme-text">Instant Data Profiling</h2>
                 <p className="text-xs text-theme-sub leading-relaxed">
                   Automatic data type inference, null counts, central tendencies (mean, median, std dev), and correlation heatmaps computed in real-time.
                 </p>
               </div>
 
               <div className="bg-theme-card p-6 rounded-2xl border border-theme-border space-y-3 hover:border-purple-500/40 transition-colors group">
-                <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl w-fit group-hover:scale-110 transition-transform">
-                  <ShieldCheck className="h-6 w-6" />
+                <div className="p-3 bg-purple-500/10 text-purple-700 dark:text-purple-300 rounded-xl w-fit group-hover:scale-110 transition-transform">
+                  <ShieldCheck aria-hidden="true" className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-bold text-theme-text">Interactive Data Cleaning</h3>
+                <h2 className="text-lg font-bold text-theme-text">Interactive Data Cleaning</h2>
                 <p className="text-xs text-theme-sub leading-relaxed">
                   Impute missing values with mean, median, mode, or custom defaults. Perform column type casting, renaming, and row filtering on the fly.
                 </p>
               </div>
 
               <div className="bg-theme-card p-6 rounded-2xl border border-theme-border space-y-3 hover:border-cyan-500/40 transition-colors group">
-                <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl w-fit group-hover:scale-110 transition-transform">
-                  <FileSpreadsheet className="h-6 w-6" />
+                <div className="p-3 bg-cyan-500/10 text-cyan-800 dark:text-cyan-300 rounded-xl w-fit group-hover:scale-110 transition-transform">
+                  <FileSpreadsheet aria-hidden="true" className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-bold text-theme-text">Export & Anomaly Detection</h3>
+                <h2 className="text-lg font-bold text-theme-text">Export & Anomaly Detection</h2>
                 <p className="text-xs text-theme-sub leading-relaxed">
                   Automated IQR statistical outlier detection, interactive Recharts visualizations, and 1-click dataset exports to CSV, Excel, or JSON.
                 </p>
@@ -207,21 +207,23 @@ function App() {
             {/* Active File Toolbar Banner */}
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center bg-theme-card px-4 sm:px-6 py-4 rounded-2xl shadow-sm border border-theme-border gap-4">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
-                <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl shrink-0">
-                  <Layers className="h-5 w-5" />
+                <div className="p-2.5 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 rounded-xl shrink-0">
+                  <Layers aria-hidden="true" className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h2 className="text-base sm:text-lg font-bold text-theme-text truncate">{data.filename}</h2>
                   <p className="text-[11px] font-semibold text-theme-sub truncate">
-                    Session ID: <span className="font-mono text-indigo-400">{data.dataset_id.slice(0, 8)}...</span> • {data.row_count} rows • {data.columns.length} columns
+                    Session ID: <span className="font-mono text-indigo-700 dark:text-indigo-300">{data.dataset_id.slice(0, 8)}...</span> • {data.row_count} rows • {data.columns.length} columns
                   </p>
                 </div>
               </div>
               <button 
+                type="button"
                 onClick={() => setData(null)}
-                className="group flex items-center justify-center shrink-0 px-4 py-2 text-xs font-bold text-theme-text hover:text-indigo-400 bg-theme-bg hover:bg-theme-border rounded-xl transition-all border border-theme-border cursor-pointer"
+                aria-label="Upload a different dataset file"
+                className="group flex items-center justify-center shrink-0 px-4 py-2 text-xs font-bold text-theme-text hover:text-indigo-600 bg-theme-bg hover:bg-theme-border rounded-xl transition-all border border-theme-border cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               >
-                <RefreshCw className="h-3.5 w-3.5 mr-2 transition-transform group-hover:rotate-180 duration-500" />
+                <RefreshCw aria-hidden="true" className="h-3.5 w-3.5 mr-2 transition-transform group-hover:rotate-180 duration-500" />
                 Upload Different File
               </button>
             </div>
@@ -254,33 +256,33 @@ function App() {
             <div className="space-y-4 md:col-span-1">
               <div className="flex items-center space-x-2">
                 <div className="p-1.5 bg-indigo-600 rounded-lg">
-                  <BarChart3 className="h-4 w-4 text-white" />
+                  <BarChart3 aria-hidden="true" className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-lg font-black text-theme-text tracking-tight">Panboard</span>
               </div>
               <p className="text-xs text-theme-sub leading-relaxed">
                 High-performance Dashboard-as-a-Service for instant data profiling, interactive cleaning, and visual analytics.
               </p>
-              <div className="flex items-center space-x-2 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full w-fit border border-emerald-500/20">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <div className="flex items-center space-x-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-3 py-1.5 rounded-full w-fit border border-emerald-500/20">
+                <span aria-hidden="true" className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>All Engine Systems Operational</span>
               </div>
             </div>
 
             {/* Column 2: Product Features */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-theme-text uppercase tracking-wider">Product Features</h4>
+              <h2 className="text-xs font-bold text-theme-text uppercase tracking-wider">Product Features</h2>
               <ul className="space-y-2 text-xs text-theme-sub font-medium">
-                <li className="flex items-center"><CheckCircle2 className="h-3 w-3 mr-1.5 text-indigo-400" /> Multi-format Dataset Upload</li>
-                <li className="flex items-center"><CheckCircle2 className="h-3 w-3 mr-1.5 text-indigo-400" /> Mean / Mode Imputation</li>
-                <li className="flex items-center"><CheckCircle2 className="h-3 w-3 mr-1.5 text-indigo-400" /> Dynamic IQR Outlier Checks</li>
-                <li className="flex items-center"><CheckCircle2 className="h-3 w-3 mr-1.5 text-indigo-400" /> CSV, XLSX & JSON Exports</li>
+                <li className="flex items-center"><CheckCircle2 aria-hidden="true" className="h-3 w-3 mr-1.5 text-indigo-700 dark:text-indigo-300" /> Multi-format Dataset Upload</li>
+                <li className="flex items-center"><CheckCircle2 aria-hidden="true" className="h-3 w-3 mr-1.5 text-indigo-700 dark:text-indigo-300" /> Mean / Mode Imputation</li>
+                <li className="flex items-center"><CheckCircle2 aria-hidden="true" className="h-3 w-3 mr-1.5 text-indigo-700 dark:text-indigo-300" /> Dynamic IQR Outlier Checks</li>
+                <li className="flex items-center"><CheckCircle2 aria-hidden="true" className="h-3 w-3 mr-1.5 text-indigo-700 dark:text-indigo-300" /> CSV, XLSX & JSON Exports</li>
               </ul>
             </div>
 
             {/* Column 3: Tech Stack */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-theme-text uppercase tracking-wider">Tech Architecture</h4>
+              <h2 className="text-xs font-bold text-theme-text uppercase tracking-wider">Tech Architecture</h2>
               <ul className="space-y-2 text-xs text-theme-sub font-medium">
                 <li>FastAPI & Pandas Data Engine</li>
                 <li>React 19 + TypeScript + Vite</li>
@@ -291,16 +293,16 @@ function App() {
 
             {/* Column 4: Support & Legal */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-theme-text uppercase tracking-wider">Support & Legal</h4>
+              <h2 className="text-xs font-bold text-theme-text uppercase tracking-wider">Support & Legal</h2>
               <div className="flex flex-col space-y-2 text-xs text-theme-sub font-medium">
-                <button onClick={() => setActiveFooterModal('privacy')} className="text-left hover:text-indigo-400 transition-colors flex items-center cursor-pointer">
-                  <Lock className="h-3 w-3 mr-1.5" /> Privacy Policy
+                <button type="button" onClick={() => setActiveFooterModal('privacy')} aria-label="View Privacy Policy" className="text-left hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center cursor-pointer">
+                  <Lock aria-hidden="true" className="h-3 w-3 mr-1.5" /> Privacy Policy
                 </button>
-                <button onClick={() => setActiveFooterModal('terms')} className="text-left hover:text-indigo-400 transition-colors flex items-center cursor-pointer">
-                  <FileText className="h-3 w-3 mr-1.5" /> Terms of Service
+                <button type="button" onClick={() => setActiveFooterModal('terms')} aria-label="View Terms of Service" className="text-left hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center cursor-pointer">
+                  <FileText aria-hidden="true" className="h-3 w-3 mr-1.5" /> Terms of Service
                 </button>
-                <button onClick={() => setActiveFooterModal('support')} className="text-left hover:text-indigo-400 transition-colors flex items-center cursor-pointer">
-                  <HelpCircle className="h-3 w-3 mr-1.5" /> Contact Support
+                <button type="button" onClick={() => setActiveFooterModal('support')} aria-label="Contact Support Form" className="text-left hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center cursor-pointer">
+                  <HelpCircle aria-hidden="true" className="h-3 w-3 mr-1.5" /> Contact Support
                 </button>
               </div>
             </div>
@@ -309,10 +311,10 @@ function App() {
           <div className="pt-8 border-t border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-theme-sub">
             <p>© {new Date().getFullYear()} Panboard. Released under MIT License.</p>
             <div className="flex items-center space-x-4">
-              <a href="https://panboard.pages.dev" className="hover:text-theme-text transition-colors">panboard.pages.dev</a>
+              <a href="https://panboard.pages.dev" aria-label="Panboard live application domain" className="hover:text-theme-text transition-colors">panboard.pages.dev</a>
               <span>•</span>
-              <a href="https://github.com/Akhil-peram/panboard" target="_blank" rel="noreferrer" className="hover:text-theme-text transition-colors flex items-center">
-                GitHub Repo <ExternalLink className="h-3 w-3 ml-1" />
+              <a href="https://github.com/Akhil-peram/panboard" target="_blank" rel="noreferrer" aria-label="Panboard GitHub repository (opens in new tab)" className="hover:text-theme-text transition-colors flex items-center">
+                GitHub Repo <ExternalLink aria-hidden="true" className="h-3 w-3 ml-1" />
               </a>
             </div>
           </div>

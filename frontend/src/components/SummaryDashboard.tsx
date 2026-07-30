@@ -619,11 +619,11 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                 <table className="min-w-full divide-y divide-theme-border">
                   <thead className="bg-theme-bg">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Column</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Unique</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Health</th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-theme-sub uppercase">Column</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-theme-sub uppercase">Type</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-theme-sub uppercase">Unique</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-theme-sub uppercase">Health</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-theme-sub uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-theme-card divide-y divide-theme-border">
@@ -635,7 +635,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                           <td className="px-6 py-4 text-sm font-medium text-theme-text">{col}</td>
                           <td className="px-6 py-4">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              numeric_columns.includes(col) ? 'bg-emerald-500/10 text-emerald-500' : 'bg-purple-500/10 text-purple-400'
+                              numeric_columns.includes(col) ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-purple-500/10 text-purple-700 dark:text-purple-300'
                             }`}>
                               {info[col].type}
                             </span>
@@ -1225,9 +1225,9 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
 const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; color: string }> = ({ title, value, icon, color }) => {
   const colorClasses: Record<string, string> = {
     indigo: 'bg-theme-accent-bg text-theme-accent-text',
-    blue: 'bg-sky-500/10 text-sky-400',
-    emerald: 'bg-emerald-500/10 text-emerald-400',
-    purple: 'bg-purple-500/10 text-purple-400',
+    blue: 'bg-sky-500/10 text-sky-800 dark:text-sky-300',
+    emerald: 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300',
+    purple: 'bg-purple-500/10 text-purple-800 dark:text-purple-300',
   };
 
   return (
