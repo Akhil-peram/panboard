@@ -2,7 +2,7 @@
 
 Panboard is a modern, high-performance **Dashboard-as-a-Service** application. It allows users to upload raw datasets, instantly profile them, clean or transform columns interactively, and view beautifully structured statistical visualizations in real-time.
 
-![Pyton](https://img.sheilds.io/badge/Python-3.13+-blue.svg)
+![Python](https://img.sheilds.io/badge/Python-3.13+-blue.svg)
 
 ```mermaid
 graph TD
