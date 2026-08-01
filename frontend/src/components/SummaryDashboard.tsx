@@ -62,25 +62,6 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
   const [filterOp, setFilterOp] = useState('==');
   const [filterVal, setFilterVal] = useState('');
   const [isFiltering, setIsFiltering] = useState(false);
-  const [showBulkCleanModal, setShowBulkCleanModal] = useState(false);
-
-  const handleExecuteBulkClean = async (strategy: 'drop_nulls' | 'drop_duplicates' | 'trim_strings' | 'uppercase' | 'lowercase' | 'fill_all_nulls') => {
-    if (!data.dataset_id) return;
-    setIsTransforming(true);
-    try {
-      const updatedData = await transformDataset(data.dataset_id, {
-        action: 'bulk_clean',
-        column: '',
-        strategy: strategy,
-      });
-      onDataUpdate(updatedData);
-      setShowBulkCleanModal(false);
-    } catch (err: any) {
-      alert(err.message || 'Failed to execute bulk clean.');
-    } finally {
-      setIsTransforming(false);
-    }
-  };
 
   const { columns, info, categorical_summary, sample_data, stats, numeric_columns, categorical_columns } = data || {};
 
@@ -506,17 +487,6 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
               <span className="truncate">{data.filename} • {data.row_count} rows</span>
             </div>
             <div className="flex items-center space-x-2 shrink-0">
-              {/* Bulk Smart Clean Button */}
-              <button
-                type="button"
-                onClick={() => setShowBulkCleanModal(true)}
-                className="flex items-center space-x-1 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold rounded-xl transition-all duration-300 border border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 cursor-pointer"
-                title="Perform 1-click bulk data cleaning (trim whitespace, drop duplicates, fill nulls)"
-              >
-                <Wand2 aria-hidden="true" className="h-3.5 w-3.5 mr-1 shrink-0" />
-                <span>Smart Clean</span>
-              </button>
-
               {/* Export Dropdown */}
               <div className="relative">
                 <button
@@ -605,14 +575,6 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                   </span>
                 </div>
               </div>
-
-              {data.insights.narrative && (
-                <div className="p-3.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs text-theme-text leading-relaxed font-medium">
-                  <span className="font-bold text-indigo-500 mr-1.5">Executive Narrative:</span>
-                  {data.insights.narrative}
-                </div>
-              )}
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {data.insights.items.map((item, idx) => (
                   <div key={idx} className="p-4 rounded-xl border border-theme-border bg-theme-bg/50 flex items-start space-x-3">
@@ -1251,119 +1213,6 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ data, onDataUpdate 
                 ) : (
                   'Apply Transform'
                 )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bulk Data Cleaning Modal */}
-      {showBulkCleanModal && (
-        <div 
-          role="dialog" 
-          aria-modal="true" 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-300"
-        >
-          <div className="bg-theme-card rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-theme-border animate-in zoom-in-95 duration-300 space-y-6">
-            <div className="flex justify-between items-center pb-4 border-b border-theme-border">
-              <div className="flex items-center space-x-3">
-                <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl">
-                  <Wand2 className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-theme-text">1-Click Smart Data Cleaning</h3>
-                  <p className="text-xs text-theme-sub">Apply instant bulk cleaning across the entire dataset</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowBulkCleanModal(false)}
-                className="text-theme-sub hover:text-theme-text p-1.5 hover:bg-theme-border rounded-lg transition-all"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                type="button"
-                disabled={isTransforming}
-                onClick={() => handleExecuteBulkClean('trim_strings')}
-                className="p-4 bg-theme-bg hover:bg-theme-border/60 border border-theme-border rounded-2xl text-left space-y-1 transition-all cursor-pointer group"
-              >
-                <div className="text-xs font-bold text-theme-text group-hover:text-emerald-500 transition-colors">
-                  ✂️ Trim String Whitespace
-                </div>
-                <div className="text-[11px] text-theme-sub">Remove leading/trailing spaces in all text columns</div>
-              </button>
-
-              <button
-                type="button"
-                disabled={isTransforming}
-                onClick={() => handleExecuteBulkClean('drop_duplicates')}
-                className="p-4 bg-theme-bg hover:bg-theme-border/60 border border-theme-border rounded-2xl text-left space-y-1 transition-all cursor-pointer group"
-              >
-                <div className="text-xs font-bold text-theme-text group-hover:text-emerald-500 transition-colors">
-                  🗑️ Drop Duplicate Rows
-                </div>
-                <div className="text-[11px] text-theme-sub">Remove identical duplicate rows from dataset</div>
-              </button>
-
-              <button
-                type="button"
-                disabled={isTransforming}
-                onClick={() => handleExecuteBulkClean('drop_nulls')}
-                className="p-4 bg-theme-bg hover:bg-theme-border/60 border border-theme-border rounded-2xl text-left space-y-1 transition-all cursor-pointer group"
-              >
-                <div className="text-xs font-bold text-theme-text group-hover:text-emerald-500 transition-colors">
-                  🚫 Drop Null Rows
-                </div>
-                <div className="text-[11px] text-theme-sub">Delete any row containing missing values</div>
-              </button>
-
-              <button
-                type="button"
-                disabled={isTransforming}
-                onClick={() => handleExecuteBulkClean('fill_all_nulls')}
-                className="p-4 bg-theme-bg hover:bg-theme-border/60 border border-theme-border rounded-2xl text-left space-y-1 transition-all cursor-pointer group"
-              >
-                <div className="text-xs font-bold text-theme-text group-hover:text-emerald-500 transition-colors">
-                  🩹 Fill All Null Cells
-                </div>
-                <div className="text-[11px] text-theme-sub">Fill numeric nulls with 0 and strings with 'N/A'</div>
-              </button>
-
-              <button
-                type="button"
-                disabled={isTransforming}
-                onClick={() => handleExecuteBulkClean('uppercase')}
-                className="p-4 bg-theme-bg hover:bg-theme-border/60 border border-theme-border rounded-2xl text-left space-y-1 transition-all cursor-pointer group"
-              >
-                <div className="text-xs font-bold text-theme-text group-hover:text-emerald-500 transition-colors">
-                  🔠 Convert to UPPERCASE
-                </div>
-                <div className="text-[11px] text-theme-sub">Transform all text column values to UPPERCASE</div>
-              </button>
-
-              <button
-                type="button"
-                disabled={isTransforming}
-                onClick={() => handleExecuteBulkClean('lowercase')}
-                className="p-4 bg-theme-bg hover:bg-theme-border/60 border border-theme-border rounded-2xl text-left space-y-1 transition-all cursor-pointer group"
-              >
-                <div className="text-xs font-bold text-theme-text group-hover:text-emerald-500 transition-colors">
-                  🔤 Convert to lowercase
-                </div>
-                <div className="text-[11px] text-theme-sub">Transform all text column values to lowercase</div>
-              </button>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowBulkCleanModal(false)}
-                className="px-4 py-2 bg-theme-bg hover:bg-theme-border text-theme-text text-xs font-bold rounded-xl border border-theme-border transition-colors cursor-pointer"
-              >
-                Close
               </button>
             </div>
           </div>
