@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Query
+from fastapi import FastAPI, UploadFile, File, Query, Request
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
@@ -7,6 +7,9 @@ import uuid
 import os
 import time
 import pickle
+import json
+from datetime import datetime
+from threading import Lock
 
 app = FastAPI()
 
@@ -15,7 +18,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://panboard.pages.dev",
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -25,6 +29,86 @@ app.add_middleware(
 # Disk-based cache configuration for multi-worker support and memory protection
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "data_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
+
+# Visitor count & IP analytics configuration
+VISITOR_STATS_FILE = os.path.join(CACHE_DIR, "visitor_stats.json")
+visitor_lock = Lock()
+
+def get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+        if client_ip:
+            return client_ip
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
+    if request.client and request.client.host:
+        return request.client.host
+    return "127.0.0.1"
+
+def load_visitor_stats():
+    if os.path.exists(VISITOR_STATS_FILE):
+        try:
+            with open(VISITOR_STATS_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "total_visits": 0,
+        "visitors": {},
+        "recent_logs": []
+    }
+
+def save_visitor_stats(stats):
+    try:
+        with open(VISITOR_STATS_FILE, "w") as f:
+            json.dump(stats, f, indent=2)
+    except Exception:
+        pass
+
+def record_visitor(request: Request):
+    ip = get_client_ip(request)
+    ua = request.headers.get("user-agent", "Unknown")[:150]
+    now_str = datetime.now().isoformat()
+    endpoint = request.url.path
+
+    with visitor_lock:
+        stats = load_visitor_stats()
+        stats["total_visits"] += 1
+        
+        if ip not in stats["visitors"]:
+            stats["visitors"][ip] = {
+                "ip": ip,
+                "visits": 1,
+                "first_seen": now_str,
+                "last_seen": now_str,
+                "user_agent": ua
+            }
+        else:
+            stats["visitors"][ip]["visits"] += 1
+            stats["visitors"][ip]["last_seen"] = now_str
+            stats["visitors"][ip]["user_agent"] = ua
+
+        log_entry = {
+            "ip": ip,
+            "endpoint": endpoint,
+            "timestamp": now_str
+        }
+        stats["recent_logs"].insert(0, log_entry)
+        stats["recent_logs"] = stats["recent_logs"][:50]  # Keep last 50 entries
+        
+        save_visitor_stats(stats)
+    return ip
+
+@app.middleware("http")
+async def track_visitors_middleware(request: Request, call_next):
+    try:
+        record_visitor(request)
+    except Exception:
+        pass
+    response = await call_next(request)
+    return response
 
 def get_cache_path(dataset_id: str) -> str:
     return os.path.join(CACHE_DIR, f"{dataset_id}.pkl")
@@ -44,18 +128,23 @@ def clean_expired_cache():
     now = time.time()
     for fname in os.listdir(CACHE_DIR):
         fpath = os.path.join(CACHE_DIR, fname)
-        if os.path.isfile(fpath):
+        if os.path.isfile(fpath) and fname != "visitor_stats.json":
             # If modified more than 30 minutes (1800 seconds) ago, evict
             if now - os.path.getmtime(fpath) > 1800:
                 try:
                     os.remove(fpath)
                 except Exception:
                     pass
+
 def generate_insights(df: pd.DataFrame):
     insights = []
     total_rows = len(df)
     if total_rows == 0:
-        return insights
+        return {
+            "health_score": 0,
+            "narrative": "Dataset is empty.",
+            "items": []
+        }
 
     # 1. Missingness Insights
     total_cells = df.size
@@ -126,8 +215,24 @@ def generate_insights(df: pd.DataFrame):
             "column": None
         })
 
+    # Build readable narrative summary
+    num_count = len(numeric_df.columns)
+    cat_count = len(df.select_dtypes(include=['object', 'category']).columns)
+    narrative = f"Dataset contains {total_rows:,} rows and {len(df.columns)} columns ({num_count} numeric, {cat_count} categorical). "
+    if missing_pct > 0:
+        narrative += f"Overall missingness is {missing_pct:.1f}%. "
+    else:
+        narrative += "The dataset has zero missing values. "
+    if health_score >= 80:
+        narrative += "Data health is excellent and ready for downstream visual analytics."
+    elif health_score >= 50:
+        narrative += "Data health is moderate; consider imputing missing cells."
+    else:
+        narrative += "Data health requires attention due to significant missingness."
+
     return {
         "health_score": health_score,
+        "narrative": narrative,
         "items": insights
     }
 
@@ -197,14 +302,28 @@ def analyze_dataframe(df: pd.DataFrame, filename: str, dataset_id: str):
 async def root():
     return {"message": "Dashboard as a Service API is running"}
 
+@app.get("/api/stats/visitors")
+async def get_visitor_stats_endpoint(request: Request):
+    ip = get_client_ip(request)
+    with visitor_lock:
+        stats = load_visitor_stats()
+        
+    unique_visitors_count = len(stats.get("visitors", {}))
+    ip_list = list(stats.get("visitors", {}).values())
+    ip_list.sort(key=lambda x: x.get("last_seen", ""), reverse=True)
+
+    return {
+        "total_visits": stats.get("total_visits", 0),
+        "unique_visitors": unique_visitors_count,
+        "your_ip": ip,
+        "ip_breakdown": ip_list[:25],
+        "recent_logs": stats.get("recent_logs", [])[:25]
+    }
 
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     try:
-        # Read the file content
         contents = await file.read()
-        
-        # Process based on file type (case-insensitive checks)
         filename_lower = file.filename.lower()
         if filename_lower.endswith('.csv'):
             df = pd.read_csv(io.BytesIO(contents))
@@ -213,10 +332,8 @@ async def upload_file(file: UploadFile = File(...)):
         else:
             return {"error": "Unsupported file type. Please upload a CSV or Excel file."}
 
-        # Evict old cached files before saving new ones
         clean_expired_cache()
 
-        # Generate a unique ID for this session/dataset
         dataset_id = str(uuid.uuid4())
         save_to_cache(dataset_id, df, df.copy(), file.filename)
 
@@ -226,7 +343,6 @@ async def upload_file(file: UploadFile = File(...)):
 
 @app.post("/api/transform/{dataset_id}")
 async def transform_dataset(dataset_id: str, payload: dict):
-    # Evict old cached files
     clean_expired_cache()
 
     cached = load_from_cache(dataset_id)
@@ -243,6 +359,32 @@ async def transform_dataset(dataset_id: str, payload: dict):
             
         if action == "reset":
             df = original_df.copy()
+        elif action == "bulk_clean":
+            df = df.copy()
+            clean_op = payload.get("strategy", "trim_strings")
+            if clean_op == "drop_nulls":
+                df = df.dropna()
+            elif clean_op == "drop_duplicates":
+                df = df.drop_duplicates()
+            elif clean_op == "trim_strings":
+                for col in df.columns:
+                    if pd.api.types.is_string_dtype(df[col]) or pd.api.types.is_object_dtype(df[col]):
+                        df[col] = df[col].astype(str).str.strip()
+            elif clean_op == "uppercase":
+                for col in df.columns:
+                    if pd.api.types.is_string_dtype(df[col]) or pd.api.types.is_object_dtype(df[col]):
+                        df[col] = df[col].astype(str).str.upper()
+            elif clean_op == "lowercase":
+                for col in df.columns:
+                    if pd.api.types.is_string_dtype(df[col]) or pd.api.types.is_object_dtype(df[col]):
+                        df[col] = df[col].astype(str).str.lower()
+            elif clean_op == "fill_all_nulls":
+                num_cols = df.select_dtypes(include=['number']).columns
+                df[num_cols] = df[num_cols].fillna(0)
+                other_cols = df.select_dtypes(exclude=['number']).columns
+                df[other_cols] = df[other_cols].fillna("N/A")
+            else:
+                return {"error": f"Unsupported bulk clean strategy: '{clean_op}'."}
         else:
             # Make a copy to avoid mutation side-effects during operations
             df = df.copy()
@@ -305,7 +447,6 @@ async def transform_dataset(dataset_id: str, payload: dict):
                 df = df.rename(columns={column: new_name})
                 
             elif action == "filter":
-                # Filtering can be done on columns
                 filter_col = payload.get("column")
                 operator = payload.get("operator")
                 value = payload.get("value")
@@ -315,9 +456,7 @@ async def transform_dataset(dataset_id: str, payload: dict):
                 if filter_col not in df.columns:
                     return {"error": f"Column '{filter_col}' not found in the dataset."}
                     
-                # Apply filter
                 try:
-                    # Cast filter comparison value if numeric
                     if pd.api.types.is_numeric_dtype(df[filter_col]):
                         value = float(value)
                         
@@ -342,10 +481,7 @@ async def transform_dataset(dataset_id: str, payload: dict):
             else:
                 return {"error": f"Unsupported transformation action: '{action}'."}
                 
-        # Save the updated dataframe
         save_to_cache(dataset_id, df, original_df, filename)
-        
-        # Recalculate analysis and return
         return analyze_dataframe(df, filename, dataset_id)
     except Exception as e:
         return {"error": f"Transformation failed: {str(e)}"}

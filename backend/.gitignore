@@ -6,5 +6,8 @@ dist/
 wheels/
 *.egg-info
 
+# Ephemeral cache
+data_cache/
+
 # Virtual environments
 .venv

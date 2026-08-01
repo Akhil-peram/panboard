@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import FileUpload from './components/FileUpload'
 import SummaryDashboard from './components/SummaryDashboard'
+import VisitorCounter from './components/VisitorCounter'
 import type { UploadResponse } from './services/api'
 import { 
   BarChart3, 
@@ -309,7 +310,11 @@ function App() {
           </div>
 
           <div className="pt-8 border-t border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-theme-sub">
-            <p>© {new Date().getFullYear()} Panboard. Released under MIT License.</p>
+            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <p>© {new Date().getFullYear()} Panboard. Released under MIT License.</p>
+              {/* Visitor Counter at Bottom */}
+              <VisitorCounter />
+            </div>
             <div className="flex items-center space-x-4">
               <a href="https://panboard.pages.dev" aria-label="Panboard live application domain" className="hover:text-theme-text transition-colors">panboard.pages.dev</a>
               <span>•</span>

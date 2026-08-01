@@ -294,3 +294,42 @@ def test_insights_and_export():
     assert export_xlsx.status_code == 200
     assert "spreadsheetml" in export_xlsx.headers["content-type"]
 
+def test_visitor_stats():
+    # Call visitors stats endpoint
+    response = client.get("/api/stats/visitors", headers={"X-Forwarded-For": "203.0.113.195"})
+    assert response.status_code == 200
+    json_data = response.json()
+    assert "total_visits" in json_data
+    assert "unique_visitors" in json_data
+    assert "your_ip" in json_data
+    assert json_data["your_ip"] == "203.0.113.195"
+    assert json_data["total_visits"] > 0
+    assert json_data["unique_visitors"] > 0
+
+def test_transform_bulk_clean():
+    data = "name,age\n Alice ,30\nBob,\nAlice,30"
+    file = io.BytesIO(data.encode("utf-8"))
+    
+    upload_resp = client.post(
+        "/api/upload",
+        files={"file": ("test_bulk.csv", file, "text/csv")}
+    )
+    dataset_id = upload_resp.json()["dataset_id"]
+    
+    # Bulk clean: trim strings
+    trim_resp = client.post(
+        f"/api/transform/{dataset_id}",
+        json={"action": "bulk_clean", "column": "", "strategy": "trim_strings"}
+    )
+    assert trim_resp.status_code == 200
+    sample = trim_resp.json()["sample_data"]
+    assert sample[0]["name"] == "Alice"  # Trimmed " Alice " -> "Alice"
+
+    # Bulk clean: drop duplicates
+    dup_resp = client.post(
+        f"/api/transform/{dataset_id}",
+        json={"action": "bulk_clean", "column": "", "strategy": "drop_duplicates"}
+    )
+    assert dup_resp.status_code == 200
+
+

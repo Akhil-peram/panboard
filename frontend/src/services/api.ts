@@ -1,4 +1,14 @@
-const API_BASE_URL = 'https://panboard.onrender.com';
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:8000';
+    }
+  }
+  return (import.meta.env.VITE_API_BASE_URL as string) || 'https://panboard.onrender.com';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export interface InsightItem {
   type: 'warning' | 'info' | 'success';
@@ -10,6 +20,7 @@ export interface InsightItem {
 
 export interface InsightsData {
   health_score: number;
+  narrative?: string;
   items: InsightItem[];
 }
 
@@ -30,14 +41,36 @@ export interface UploadResponse {
 }
 
 export interface TransformPayload {
-  action: 'impute' | 'cast' | 'rename' | 'filter' | 'reset';
+  action: 'impute' | 'cast' | 'rename' | 'filter' | 'reset' | 'bulk_clean';
   column: string;
-  strategy?: 'mean' | 'median' | 'mode' | 'value';
+  strategy?: 'mean' | 'median' | 'mode' | 'value' | 'drop_nulls' | 'drop_duplicates' | 'trim_strings' | 'uppercase' | 'lowercase' | 'fill_all_nulls';
   fill_value?: string | number | boolean | null;
   value?: string | number | boolean | null;
   operator?: '==' | '!=' | '>' | '<' | '>=' | '<=' | 'contains';
   new_name?: string;
   data_type?: 'int' | 'float' | 'str' | 'datetime';
+}
+
+export interface VisitorBreakdownItem {
+  ip: string;
+  visits: number;
+  first_seen: string;
+  last_seen: string;
+  user_agent: string;
+}
+
+export interface VisitorLogEntry {
+  ip: string;
+  endpoint: string;
+  timestamp: string;
+}
+
+export interface VisitorStatsResponse {
+  total_visits: number;
+  unique_visitors: number;
+  your_ip: string;
+  ip_breakdown: VisitorBreakdownItem[];
+  recent_logs: VisitorLogEntry[];
 }
 
 export const uploadFile = async (file: File): Promise<UploadResponse> => {
@@ -81,6 +114,15 @@ export const transformDataset = async (datasetId: string, payload: TransformPayl
 export const getExportUrl = (datasetId: string, format: 'csv' | 'xlsx' | 'json'): string => {
   return `${API_BASE_URL}/api/export/${datasetId}?format=${format}`;
 };
+
+export const getVisitorStats = async (): Promise<VisitorStatsResponse> => {
+  const response = await fetch(`${API_BASE_URL}/api/stats/visitors`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch visitor stats');
+  }
+  return response.json();
+};
+
 
 
 
